@@ -1,12 +1,12 @@
 import type { NextFetchEvent } from "next/server";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const isPlaceholderClerkKey =
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "pk_test_placeholder";
 
 export async function middleware(
-  request: Request,
+  request: NextRequest,
   event: NextFetchEvent
 ) {
   if (isPlaceholderClerkKey) {
@@ -16,7 +16,7 @@ export async function middleware(
     "@clerk/nextjs/server"
   );
   const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
-  const clerkMw = clerkMiddleware((auth, req: Request) => {
+  const clerkMw = clerkMiddleware((auth, req: NextRequest) => {
     if (!isPublicRoute(req)) {
       auth.protect();
     }

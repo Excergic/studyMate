@@ -11,9 +11,6 @@ const isPlaceholderClerkKey =
   !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "pk_test_placeholder";
 
-// Avoid prerendering when Clerk key is placeholder (e.g. CI build)
-export const dynamic = isPlaceholderClerkKey ? "force-dynamic" : undefined;
-
 export default function RootLayout({
   children,
 }: Readonly<{
