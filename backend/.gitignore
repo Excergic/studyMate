@@ -3,3 +3,4 @@
 .env.local
 *.pyc
 __pycache__/
+docs
