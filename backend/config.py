@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     # Tavily 
     tavily_api_key: str = os.getenv("TAVILY_API_KEY", "")
 
+    serpapi_api_key: str = os.getenv("SERPAPI_API_KEY", "")
+
     # Optional: Clerk JWT verification (if you want to verify frontend tokens)
     clerk_publishable_key: str = os.getenv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "")
     clerk_secret_key: str = os.getenv("CLERK_SECRET_KEY", "")

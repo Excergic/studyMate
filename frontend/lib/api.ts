@@ -152,3 +152,66 @@ export async function askQuestionStream(
     reader.releaseLock();
   }
 }
+
+export async function compareProductsStream(
+  query: string,
+  token: string,
+  conversationId: string | null,
+  callbacks: {
+    onChunk: (chunk: string) => void;
+    onDone: (conversation_id: string | null) => void;
+    onError: (error: string) => void;
+  }
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/compare/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      query,
+      conversation_id: conversationId,
+    }),
+  });
+ 
+  if (!res.ok) {
+    const err = await res.text();
+    callbacks.onError(err || `HTTP ${res.status}`);
+    return;
+  }
+ 
+  const reader = res.body?.getReader();
+  if (!reader) {
+    callbacks.onError("No response body");
+    return;
+  }
+ 
+  const decoder = new TextDecoder();
+  let buffer = "";
+ 
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+ 
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+ 
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      try {
+        const data = JSON.parse(line.slice(6));
+        if (data.content) {
+          callbacks.onChunk(data.content);
+        }
+        if (data.done) {
+          callbacks.onDone(data.conversation_id || null);
+          return;
+        }
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+}
